@@ -112,4 +112,35 @@ class UserController extends Controller
             $request->user(), 'Data profil berhasil diambil'
         );
     }
+
+    public function updateProfile(Request $request){
+        try{
+            $request -> validate([
+                'name' => ['required','string','max:255'],
+                'email' => ['required','string','email','max:255', 'unique:users'],
+                'username' => ['required','string','max:255', 'unique:users'],
+                'phone' => ['nullable','string','max:255'],
+            ]);
+
+            $data = $request->all();
+
+            $user = Auth::user();
+            $user->update($data);
+
+            return ResponseFormatter::success($user, 'Update Successs');
+            
+        }  catch(Exception $error)
+        {
+            return ResponseFormatter::error([
+                'message' => 'Something went wrong',
+                'error'=> $error->getMessage()
+            ], 'Authentication Failed', 500);
+        }
+    }
+
+    public function logout(Request $request){
+        $token = $request->user()->currentAccessToken()->delete();
+
+        return ResponseFormatter::success($token, 'Token Rovoked');
+    }
 }
